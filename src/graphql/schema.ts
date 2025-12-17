@@ -35,5 +35,7 @@ export const typeDefs = gql `
 
         addMovieToUser(idMovie: ID!): User!
         remoteMovieFromUser(idMovie: ID!): User!
+
+        updateMovie(id: ID!, title: String, length: Int, date: String, format: String): Movie!
     }
 `

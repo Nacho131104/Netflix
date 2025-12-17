@@ -72,3 +72,21 @@ export const removeMovieUser = async(idMovie: string, idUser: string)=>{
     )
     return await db.collection(COLLECTION_USERS).findOne({_id: new ObjectId(idUser)})
 }
+
+
+export const updateMovieByParams = async(id: string,title ?: string, length ?:number, date ?: string, format ?:string)=>{
+    const db = getDb()
+    let updated :any = {}
+    if(title) updated.title = title
+    if(length) updated.length = length
+    if(date) updated.date = date
+    if(format) updated.format = format
+
+    const modified = await db.collection(COLLECTION_MOVIES).updateOne(
+        {_id: new ObjectId(id)},
+        {$set: updated}
+    )
+    if(!modified)throw new Error("La peli no se ha encontrado")
+    const peliculaModificada = await getMoviebyId(id)
+    return peliculaModificada
+}

@@ -3,7 +3,7 @@ import { getDb } from "../mongo/conexion";
 import { ObjectId } from "mongodb";
 import { insertarUsuario, comprobarContraseña} from "../collection/users";
 import { signToken } from "../auth";
-import { insertMovie,getMoviebyId,getMovies, deleteMovieById, addMovieUser, removeMovieUser } from "../collection/peliculas";
+import { insertMovie,getMoviebyId,getMovies, deleteMovieById, addMovieUser, removeMovieUser, updateMovieByParams } from "../collection/peliculas";
 import { User } from "../types";
 import { COLLECTION_MOVIES, COLLECTION_USERS } from "../utils";
 
@@ -61,6 +61,10 @@ export const resolvers:IResolvers = {
         remoteMovieFromUser:async(_,{idMovie},{user})=>{
             if(!user)throw new Error("Debes logearte primero")
             return await removeMovieUser(idMovie,user._id.toString())
+        },
+        updateMovie:async(_,{id,title, length,date, format},{user})=>{
+            if(!user)throw new Error("Debes logearte primero")
+            return await updateMovieByParams(id,title,length,date,format)
         }
         
     }
