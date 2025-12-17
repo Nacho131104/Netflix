@@ -33,7 +33,7 @@ export const typeDefs = gql `
         addMovie(title: String!, length: Int!, date: String!, format: String!): Movie!
         deleteMovie(id: ID!): [Movie]!
 
-        addMovieToUser(idmovie: ID!): User!
-        remoteMovieFromUser(idmovie: ID!): User!
+        addMovieToUser(idMovie: ID!): User!
+        remoteMovieFromUser(idMovie: ID!): User!
     }
 `

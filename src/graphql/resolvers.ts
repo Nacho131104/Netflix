@@ -3,13 +3,23 @@ import { getDb } from "../mongo/conexion";
 import { ObjectId } from "mongodb";
 import { insertarUsuario, comprobarContraseña} from "../collection/users";
 import { signToken } from "../auth";
-import { insertMovie,getMoviebyId,getMovies } from "../collection/peliculas";
+import { insertMovie,getMoviebyId,getMovies, deleteMovieById, addMovieUser, removeMovieUser } from "../collection/peliculas";
+import { User } from "../types";
+import { COLLECTION_MOVIES, COLLECTION_USERS } from "../utils";
 
 
 
 
 
 export const resolvers:IResolvers = {
+    User :{
+        mi_lista:async(parent: User) =>{
+            const db = getDb()
+            const ids = (parent.mi_lista || []).map((id) => new ObjectId(id))
+            const lista = await db.collection(COLLECTION_MOVIES).find({_id:{$in:ids}}).toArray()
+            return lista
+        }
+    },
     Query :{
         me: async (_, __, { user }) => {
             if (!user) return null;
@@ -41,6 +51,16 @@ export const resolvers:IResolvers = {
         },
         deleteMovie:async(_,{id},{user})=>{
             if(!user)throw new Error("Debes logearte primero")
+            return await deleteMovieById(id)
+        },
+        addMovieToUser:async(_,{idMovie},{user})=>{
+            console.log(user)
+            if(!user)throw new Error("Debes logearte primero")
+            return await addMovieUser(idMovie,user._id.toString())
+        },
+        remoteMovieFromUser:async(_,{idMovie},{user})=>{
+            if(!user)throw new Error("Debes logearte primero")
+            return await removeMovieUser(idMovie,user._id.toString())
         }
         
     }

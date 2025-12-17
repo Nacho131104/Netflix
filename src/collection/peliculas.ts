@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb"
 import { getDb } from "../mongo/conexion"
-import { Movie } from "../types"
-import { COLLECTION_MOVIES } from "../utils"
+import { Movie, User } from "../types"
+import { COLLECTION_MOVIES , COLLECTION_USERS} from "../utils"
 
 
 export const insertMovie = async(title: string,length: number, date: string, format: string) =>{
@@ -27,7 +27,7 @@ export const insertMovie = async(title: string,length: number, date: string, for
     }
 }
 
-export const getMoviebyId = async (id: string):Promise<Movie> =>{
+export const getMoviebyId = async (id: string) =>{
     const db = getDb()
     const peli = await db.collection<Movie>(COLLECTION_MOVIES).findOne({_id: new ObjectId(id)})
     if(!peli) throw new Error("Error al elegir peli")
@@ -47,4 +47,28 @@ export const deleteMovieById = async(id: string) =>{
     
     const movies = await getMovies(0,0)
     return movies
+}
+export const addMovieUser = async(idMovie: string, idUser: string)=>{
+    const db = getDb()
+
+    const peli = await db.collection(COLLECTION_MOVIES).findOne({_id: new ObjectId(idMovie)})
+    console.log(peli)
+    await db.collection<User>(COLLECTION_USERS).updateOne(
+        {_id: new ObjectId(idUser)},
+        {$addToSet:{mi_lista: idMovie}}
+    )
+    const modificado =  await db.collection(COLLECTION_USERS).findOne({_id: new ObjectId(idUser)})
+    if(!modificado)throw new Error("Error al modificar")
+    return modificado
+}
+
+export const removeMovieUser = async(idMovie: string, idUser: string)=>{
+    const db = getDb()
+    
+    const userid = new ObjectId(idUser)
+    await db.collection<User>(COLLECTION_USERS).updateOne(
+        {_id: new ObjectId(idUser)},
+        {$pull: {mi_lista: idMovie}}
+    )
+    return await db.collection(COLLECTION_USERS).findOne({_id: new ObjectId(idUser)})
 }
