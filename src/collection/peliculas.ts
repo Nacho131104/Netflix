@@ -1,0 +1,50 @@
+import { ObjectId } from "mongodb"
+import { getDb } from "../mongo/conexion"
+import { Movie } from "../types"
+import { COLLECTION_MOVIES } from "../utils"
+
+
+export const insertMovie = async(title: string,length: number, date: string, format: string) =>{
+    const db = getDb()
+
+    const comprobar = await db.collection(COLLECTION_MOVIES).findOne({title})
+    if(comprobar) return new Error("Esa peli ya esta metida")
+
+    const insertado = await db.collection(COLLECTION_MOVIES).insertOne({
+        title,
+        length,
+        date,
+        format
+    })
+    if(!insertado) return null
+
+    return {
+        _id: insertado.insertedId,
+        title,
+        length,
+        date,
+        format
+    }
+}
+
+export const getMoviebyId = async (id: string):Promise<Movie> =>{
+    const db = getDb()
+    const peli = await db.collection<Movie>(COLLECTION_MOVIES).findOne({_id: new ObjectId(id)})
+    if(!peli) throw new Error("Error al elegir peli")
+    return peli
+}
+export const getMovies= async (page?: number, size?: number) =>{
+    const db = getDb();
+    page = page || 1;
+    size = size || 10;
+    return await db.collection(COLLECTION_MOVIES).find().skip((page - 1) * size).limit(size).toArray();
+}
+
+export const deleteMovieById = async(id: string) =>{
+    const db = getDb()
+    const eliminado = await db.collection(COLLECTION_MOVIES).deleteOne({_id: new ObjectId(id)})
+    if(!eliminado)throw new Error("No se ha encontrado dicha peli")
+    
+    const movies = await getMovies(0,0)
+    return movies
+}
